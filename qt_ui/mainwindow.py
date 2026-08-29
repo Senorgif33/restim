@@ -196,6 +196,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.websocket_server.incoming_as5311_data.connect(self.page_sensors.new_as5311_sensor_data_from_network)
         self.websocket_server.incoming_imu_data.connect(self.page_sensors.new_imu_sensor_data_from_network)
         self.websocket_server.incoming_pressure_data.connect(self.page_sensors.new_pressure_sensor_data_from_network)
+        self.websocket_server.incoming_drv5055_data.connect(self.page_sensors.new_drv5055_sensor_data_from_network)
 
         self.http_server = net.http_server.HttpServer(self)
         self.http_server.route('/v1/status', self.api_status)
@@ -566,11 +567,13 @@ class Window(QMainWindow, Ui_MainWindow):
                 output_device.new_as5311_sensor_data.connect(self.page_sensors.new_as5311_sensor_data_from_device)
                 output_device.new_imu_sensor_data.connect(self.page_sensors.new_imu_sensor_data_from_device)
                 output_device.new_pressure_sensor_data.connect(self.page_sensors.new_pressure_sensor_data_from_device)
+                output_device.new_drv5055_sensor_data.connect(self.page_sensors.new_drv5055_sensor_data_from_device)
                 algorithm.sensor_node = self.page_sensors
 
                 output_device.new_as5311_sensor_data.connect(self.websocket_server.transmit_as5311_data)
                 output_device.new_imu_sensor_data.connect(self.websocket_server.transmit_imu_data)
                 output_device.new_pressure_sensor_data.connect(self.websocket_server.transmit_pressure_data)
+                output_device.new_drv5055_sensor_data.connect(self.websocket_server.transmit_drv5055_data)
 
                 output_device.new_battery_data.connect(self.battery_bar.setValue)
                 output_device.new_device_volume_data.connect(self.update_device_volume)

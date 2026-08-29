@@ -207,12 +207,27 @@ sensor_pressure_absolute_threshold = Setting('sensor_pressure_absolute/threshold
 sensor_pressure_absolute_range = Setting('sensor_pressure_absolute/range', 10000, float)
 sensor_pressure_absolute_volume = Setting('sensor_pressure_absolute/volume', 0, float)
 
+sensor_drv5055_rest_gap_mm = Setting('sensor_drv5055/rest_gap_mm', 6.28, float)
+sensor_drv5055_rest_volts = Setting('sensor_drv5055/rest_volts', 0.0, float)
+
+sensor_drv5055_absolute_threshold = Setting('sensor_drv5055_absolute/threshold', 6.28, float)
+sensor_drv5055_absolute_range = Setting('sensor_drv5055_absolute/range', 1.0, float)
+sensor_drv5055_absolute_volume = Setting('sensor_drv5055_absolute/volume', -50, float)
+sensor_drv5055_absolute_decay = Setting('sensor_drv5055_absolute/decay', 4.0, float)
+
+sensor_drv5055_delta_threshold = Setting('sensor_drv5055_delta/threshold', 0.05, float)
+sensor_drv5055_delta_range = Setting('sensor_drv5055_delta/range', 0.2, float)
+sensor_drv5055_delta_volume = Setting('sensor_drv5055_delta/volume', -50, float)
+sensor_drv5055_delta_absolute = Setting('sensor_drv5055_delta/absolute', True, bool)
+
 sensor_imu_source_index = Setting('sensor_imu/source_index', 1, int)
 sensor_imu_pull_url = Setting('sensor_imu/pull_url', '', str)
 sensor_as5311_source_index = Setting('sensor_as5311/source_index', 1, int)
 sensor_as5311_pull_url = Setting('sensor_as5311/pull_url', '', str)
 sensor_pressure_source_index = Setting('sensor_pressure/source_index', 1, int)
 sensor_pressure_pull_url = Setting('sensor_pressure/pull_url', '', str)
+sensor_drv5055_source_index = Setting('sensor_drv5055/source_index', 1, int)
+sensor_drv5055_pull_url = Setting('sensor_drv5055/pull_url', '', str)
 
 # Pattern preferences - we'll store this as a JSON string and convert to dict
 import json

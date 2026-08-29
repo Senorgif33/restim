@@ -7,6 +7,7 @@ from PySide6.QtWebSockets import QWebSocket
 from net.websocket_as5311 import WebsocketAS5311Handler
 from net.websocket_imu import WebsocketIMUHandler
 from net.websocket_pressure import WebsocketPressureHandler
+from net.websocket_drv5055 import WebsocketDRV5055Handler
 from qt_ui import settings
 from qt_ui.sensors.sensor_category_ui import Ui_SensorCategory
 
@@ -185,3 +186,33 @@ class SensorCategoryPressure(SensorCategory):
     def save_settings(self):
         settings.sensor_pressure_source_index.set(self.buttonGroup.checkedId())
         settings.sensor_pressure_pull_url.set(self.line_restim_url.text())
+
+
+class SensorCategoryDRV5055(SensorCategory):
+    TITLE = "DRV5055"
+    DESCRIPTION = ("Requires FOC-Stim V4 with DRV5055A1 Hall sensor (via ADS1115) on EXPD.\r\n"
+                   "Mutually exclusive with AS5311 on the same EXPD header.\r\n"
+                   "Calibrate rest gap on the absolute page before using mm modes.")
+    URL_FORMAT_STRING = "ws://localhost:{port}/sensors/drv5055"
+
+    def __init__(self):
+        super().__init__()
+
+    def create_handler(self, websocket):
+        handler = WebsocketDRV5055Handler(websocket)
+        handler.new_drv5055_data.connect(self.new_sensor_data)
+        return handler
+
+    def reload_settings(self):
+        button_id = settings.sensor_drv5055_source_index.get()
+        button = self.buttonGroup.button(button_id)
+        if button is None:
+            button = self.radio_device
+        button.setChecked(True)
+        self.line_restim_url.setText(settings.sensor_drv5055_pull_url.get())
+
+        super().reload_settings()
+
+    def save_settings(self):
+        settings.sensor_drv5055_source_index.set(self.buttonGroup.checkedId())
+        settings.sensor_drv5055_pull_url.set(self.line_restim_url.text())

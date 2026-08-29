@@ -1,38 +1,33 @@
-import constants_pb2 as _constants_pb2
+from . import constants_pb2 as _constants_pb2
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from collections.abc import Mapping as _Mapping
 from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
+
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class NotificationBoot(_message.Message):
     __slots__ = ()
-
-    def __init__(self) -> None:
-        ...
+    def __init__(self) -> None: ...
 
 class NotificationDeviceVolume(_message.Message):
-    __slots__ = ('volume', 'locked')
+    __slots__ = ("volume", "locked")
     VOLUME_FIELD_NUMBER: _ClassVar[int]
     LOCKED_FIELD_NUMBER: _ClassVar[int]
     volume: float
     locked: bool
-
-    def __init__(self, volume: _Optional[float]=..., locked: bool=...) -> None:
-        ...
+    def __init__(self, volume: _Optional[float] = ..., locked: _Optional[bool] = ...) -> None: ...
 
 class NotificationButtonPress(_message.Message):
-    __slots__ = ('state', 'timestamp_ms')
+    __slots__ = ("state", "timestamp_ms")
     STATE_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_MS_FIELD_NUMBER: _ClassVar[int]
     state: _constants_pb2.ButtonState
     timestamp_ms: int
-
-    def __init__(self, state: _Optional[_Union[_constants_pb2.ButtonState, str]]=..., timestamp_ms: _Optional[int]=...) -> None:
-        ...
+    def __init__(self, state: _Optional[_Union[_constants_pb2.ButtonState, str]] = ..., timestamp_ms: _Optional[int] = ...) -> None: ...
 
 class NotificationCurrents(_message.Message):
-    __slots__ = ('rms_a', 'rms_b', 'rms_c', 'rms_d', 'peak_a', 'peak_b', 'peak_c', 'peak_d', 'output_power', 'output_power_skin', 'peak_cmd')
+    __slots__ = ("rms_a", "rms_b", "rms_c", "rms_d", "peak_a", "peak_b", "peak_c", "peak_d", "output_power", "output_power_skin", "peak_cmd")
     RMS_A_FIELD_NUMBER: _ClassVar[int]
     RMS_B_FIELD_NUMBER: _ClassVar[int]
     RMS_C_FIELD_NUMBER: _ClassVar[int]
@@ -55,12 +50,10 @@ class NotificationCurrents(_message.Message):
     output_power: float
     output_power_skin: float
     peak_cmd: float
-
-    def __init__(self, rms_a: _Optional[float]=..., rms_b: _Optional[float]=..., rms_c: _Optional[float]=..., rms_d: _Optional[float]=..., peak_a: _Optional[float]=..., peak_b: _Optional[float]=..., peak_c: _Optional[float]=..., peak_d: _Optional[float]=..., output_power: _Optional[float]=..., output_power_skin: _Optional[float]=..., peak_cmd: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, rms_a: _Optional[float] = ..., rms_b: _Optional[float] = ..., rms_c: _Optional[float] = ..., rms_d: _Optional[float] = ..., peak_a: _Optional[float] = ..., peak_b: _Optional[float] = ..., peak_c: _Optional[float] = ..., peak_d: _Optional[float] = ..., output_power: _Optional[float] = ..., output_power_skin: _Optional[float] = ..., peak_cmd: _Optional[float] = ...) -> None: ...
 
 class NotificationOutputResistance(_message.Message):
-    __slots__ = ('resistance_a', 'reluctance_a', 'resistance_b', 'reluctance_b', 'resistance_c', 'reluctance_c', 'resistance_d', 'reluctance_d')
+    __slots__ = ("resistance_a", "reluctance_a", "resistance_b", "reluctance_b", "resistance_c", "reluctance_c", "resistance_d", "reluctance_d")
     RESISTANCE_A_FIELD_NUMBER: _ClassVar[int]
     RELUCTANCE_A_FIELD_NUMBER: _ClassVar[int]
     RESISTANCE_B_FIELD_NUMBER: _ClassVar[int]
@@ -77,12 +70,10 @@ class NotificationOutputResistance(_message.Message):
     reluctance_c: float
     resistance_d: float
     reluctance_d: float
-
-    def __init__(self, resistance_a: _Optional[float]=..., reluctance_a: _Optional[float]=..., resistance_b: _Optional[float]=..., reluctance_b: _Optional[float]=..., resistance_c: _Optional[float]=..., reluctance_c: _Optional[float]=..., resistance_d: _Optional[float]=..., reluctance_d: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, resistance_a: _Optional[float] = ..., reluctance_a: _Optional[float] = ..., resistance_b: _Optional[float] = ..., reluctance_b: _Optional[float] = ..., resistance_c: _Optional[float] = ..., reluctance_c: _Optional[float] = ..., resistance_d: _Optional[float] = ..., reluctance_d: _Optional[float] = ...) -> None: ...
 
 class NotificationSkinResistance(_message.Message):
-    __slots__ = ('resistance_a', 'reluctance_a', 'resistance_b', 'reluctance_b', 'resistance_c', 'reluctance_c', 'resistance_d', 'reluctance_d')
+    __slots__ = ("resistance_a", "reluctance_a", "resistance_b", "reluctance_b", "resistance_c", "reluctance_c", "resistance_d", "reluctance_d")
     RESISTANCE_A_FIELD_NUMBER: _ClassVar[int]
     RELUCTANCE_A_FIELD_NUMBER: _ClassVar[int]
     RESISTANCE_B_FIELD_NUMBER: _ClassVar[int]
@@ -99,12 +90,10 @@ class NotificationSkinResistance(_message.Message):
     reluctance_c: float
     resistance_d: float
     reluctance_d: float
-
-    def __init__(self, resistance_a: _Optional[float]=..., reluctance_a: _Optional[float]=..., resistance_b: _Optional[float]=..., reluctance_b: _Optional[float]=..., resistance_c: _Optional[float]=..., reluctance_c: _Optional[float]=..., resistance_d: _Optional[float]=..., reluctance_d: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, resistance_a: _Optional[float] = ..., reluctance_a: _Optional[float] = ..., resistance_b: _Optional[float] = ..., reluctance_b: _Optional[float] = ..., resistance_c: _Optional[float] = ..., reluctance_c: _Optional[float] = ..., resistance_d: _Optional[float] = ..., reluctance_d: _Optional[float] = ...) -> None: ...
 
 class SystemStatsESC1(_message.Message):
-    __slots__ = ('temp_stm32', 'temp_board', 'v_bus', 'v_ref')
+    __slots__ = ("temp_stm32", "temp_board", "v_bus", "v_ref")
     TEMP_STM32_FIELD_NUMBER: _ClassVar[int]
     TEMP_BOARD_FIELD_NUMBER: _ClassVar[int]
     V_BUS_FIELD_NUMBER: _ClassVar[int]
@@ -113,12 +102,10 @@ class SystemStatsESC1(_message.Message):
     temp_board: float
     v_bus: float
     v_ref: float
-
-    def __init__(self, temp_stm32: _Optional[float]=..., temp_board: _Optional[float]=..., v_bus: _Optional[float]=..., v_ref: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, temp_stm32: _Optional[float] = ..., temp_board: _Optional[float] = ..., v_bus: _Optional[float] = ..., v_ref: _Optional[float] = ...) -> None: ...
 
 class SystemStatsFocstimV3(_message.Message):
-    __slots__ = ('temp_stm32', 'v_sys_min', 'v_sys_max', 'v_ref', 'v_boost_min', 'v_boost_max', 'boost_duty_cycle')
+    __slots__ = ("temp_stm32", "v_sys_min", "v_sys_max", "v_ref", "v_boost_min", "v_boost_max", "boost_duty_cycle")
     TEMP_STM32_FIELD_NUMBER: _ClassVar[int]
     V_SYS_MIN_FIELD_NUMBER: _ClassVar[int]
     V_SYS_MAX_FIELD_NUMBER: _ClassVar[int]
@@ -133,22 +120,18 @@ class SystemStatsFocstimV3(_message.Message):
     v_boost_min: float
     v_boost_max: float
     boost_duty_cycle: float
-
-    def __init__(self, temp_stm32: _Optional[float]=..., v_sys_min: _Optional[float]=..., v_sys_max: _Optional[float]=..., v_ref: _Optional[float]=..., v_boost_min: _Optional[float]=..., v_boost_max: _Optional[float]=..., boost_duty_cycle: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, temp_stm32: _Optional[float] = ..., v_sys_min: _Optional[float] = ..., v_sys_max: _Optional[float] = ..., v_ref: _Optional[float] = ..., v_boost_min: _Optional[float] = ..., v_boost_max: _Optional[float] = ..., boost_duty_cycle: _Optional[float] = ...) -> None: ...
 
 class NotificationSystemStats(_message.Message):
-    __slots__ = ('esc1', 'focstimv3')
+    __slots__ = ("esc1", "focstimv3")
     ESC1_FIELD_NUMBER: _ClassVar[int]
     FOCSTIMV3_FIELD_NUMBER: _ClassVar[int]
     esc1: SystemStatsESC1
     focstimv3: SystemStatsFocstimV3
-
-    def __init__(self, esc1: _Optional[_Union[SystemStatsESC1, _Mapping]]=..., focstimv3: _Optional[_Union[SystemStatsFocstimV3, _Mapping]]=...) -> None:
-        ...
+    def __init__(self, esc1: _Optional[_Union[SystemStatsESC1, _Mapping]] = ..., focstimv3: _Optional[_Union[SystemStatsFocstimV3, _Mapping]] = ...) -> None: ...
 
 class NotificationSignalStats(_message.Message):
-    __slots__ = ('actual_pulse_frequency', 'v_drive', 'transformer_utilization', 'voltage_utilization')
+    __slots__ = ("actual_pulse_frequency", "v_drive", "transformer_utilization", "voltage_utilization")
     ACTUAL_PULSE_FREQUENCY_FIELD_NUMBER: _ClassVar[int]
     V_DRIVE_FIELD_NUMBER: _ClassVar[int]
     TRANSFORMER_UTILIZATION_FIELD_NUMBER: _ClassVar[int]
@@ -157,12 +140,10 @@ class NotificationSignalStats(_message.Message):
     v_drive: float
     transformer_utilization: float
     voltage_utilization: float
-
-    def __init__(self, actual_pulse_frequency: _Optional[float]=..., v_drive: _Optional[float]=..., transformer_utilization: _Optional[float]=..., voltage_utilization: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, actual_pulse_frequency: _Optional[float] = ..., v_drive: _Optional[float] = ..., transformer_utilization: _Optional[float] = ..., voltage_utilization: _Optional[float] = ...) -> None: ...
 
 class NotificationBattery(_message.Message):
-    __slots__ = ('battery_voltage', 'battery_charge_rate_watt', 'battery_soc', 'wall_power_present', 'chip_temperature')
+    __slots__ = ("battery_voltage", "battery_charge_rate_watt", "battery_soc", "wall_power_present", "chip_temperature")
     BATTERY_VOLTAGE_FIELD_NUMBER: _ClassVar[int]
     BATTERY_CHARGE_RATE_WATT_FIELD_NUMBER: _ClassVar[int]
     BATTERY_SOC_FIELD_NUMBER: _ClassVar[int]
@@ -173,12 +154,10 @@ class NotificationBattery(_message.Message):
     battery_soc: float
     wall_power_present: bool
     chip_temperature: float
-
-    def __init__(self, battery_voltage: _Optional[float]=..., battery_charge_rate_watt: _Optional[float]=..., battery_soc: _Optional[float]=..., wall_power_present: bool=..., chip_temperature: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, battery_voltage: _Optional[float] = ..., battery_charge_rate_watt: _Optional[float] = ..., battery_soc: _Optional[float] = ..., wall_power_present: _Optional[bool] = ..., chip_temperature: _Optional[float] = ...) -> None: ...
 
 class NotificationLSM6DSOX(_message.Message):
-    __slots__ = ('acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z')
+    __slots__ = ("acc_x", "acc_y", "acc_z", "gyr_x", "gyr_y", "gyr_z")
     ACC_X_FIELD_NUMBER: _ClassVar[int]
     ACC_Y_FIELD_NUMBER: _ClassVar[int]
     ACC_Z_FIELD_NUMBER: _ClassVar[int]
@@ -191,56 +170,54 @@ class NotificationLSM6DSOX(_message.Message):
     gyr_x: int
     gyr_y: int
     gyr_z: int
-
-    def __init__(self, acc_x: _Optional[int]=..., acc_y: _Optional[int]=..., acc_z: _Optional[int]=..., gyr_x: _Optional[int]=..., gyr_y: _Optional[int]=..., gyr_z: _Optional[int]=...) -> None:
-        ...
+    def __init__(self, acc_x: _Optional[int] = ..., acc_y: _Optional[int] = ..., acc_z: _Optional[int] = ..., gyr_x: _Optional[int] = ..., gyr_y: _Optional[int] = ..., gyr_z: _Optional[int] = ...) -> None: ...
 
 class NotificationPressure(_message.Message):
-    __slots__ = ('pressure',)
+    __slots__ = ("pressure",)
     PRESSURE_FIELD_NUMBER: _ClassVar[int]
     pressure: float
+    def __init__(self, pressure: _Optional[float] = ...) -> None: ...
 
-    def __init__(self, pressure: _Optional[float]=...) -> None:
-        ...
+class NotificationHallGirth(_message.Message):
+    __slots__ = ("raw", "volts", "delta")
+    RAW_FIELD_NUMBER: _ClassVar[int]
+    VOLTS_FIELD_NUMBER: _ClassVar[int]
+    DELTA_FIELD_NUMBER: _ClassVar[int]
+    raw: int
+    volts: float
+    delta: float
+    def __init__(self, raw: _Optional[int] = ..., volts: _Optional[float] = ..., delta: _Optional[float] = ...) -> None: ...
 
 class NotificationDebugString(_message.Message):
-    __slots__ = ('message',)
+    __slots__ = ("message",)
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     message: str
-
-    def __init__(self, message: _Optional[str]=...) -> None:
-        ...
+    def __init__(self, message: _Optional[str] = ...) -> None: ...
 
 class NotificationDebugAS5311(_message.Message):
-    __slots__ = ('raw', 'tracked', 'flags')
+    __slots__ = ("raw", "tracked", "flags")
     RAW_FIELD_NUMBER: _ClassVar[int]
     TRACKED_FIELD_NUMBER: _ClassVar[int]
     FLAGS_FIELD_NUMBER: _ClassVar[int]
     raw: int
     tracked: int
     flags: int
-
-    def __init__(self, raw: _Optional[int]=..., tracked: _Optional[int]=..., flags: _Optional[int]=...) -> None:
-        ...
+    def __init__(self, raw: _Optional[int] = ..., tracked: _Optional[int] = ..., flags: _Optional[int] = ...) -> None: ...
 
 class NotificationDebugEdging(_message.Message):
-    __slots__ = ('full_power_threshold', 'reduced_power_threshold', 'reduction')
+    __slots__ = ("full_power_threshold", "reduced_power_threshold", "reduction")
     FULL_POWER_THRESHOLD_FIELD_NUMBER: _ClassVar[int]
     REDUCED_POWER_THRESHOLD_FIELD_NUMBER: _ClassVar[int]
     REDUCTION_FIELD_NUMBER: _ClassVar[int]
     full_power_threshold: float
     reduced_power_threshold: float
     reduction: float
-
-    def __init__(self, full_power_threshold: _Optional[float]=..., reduced_power_threshold: _Optional[float]=..., reduction: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, full_power_threshold: _Optional[float] = ..., reduced_power_threshold: _Optional[float] = ..., reduction: _Optional[float] = ...) -> None: ...
 
 class NotificationDebugTeleplot(_message.Message):
-    __slots__ = ('id', 'value')
+    __slots__ = ("id", "value")
     ID_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     id: str
     value: float
-
-    def __init__(self, id: _Optional[str]=..., value: _Optional[float]=...) -> None:
-        ...
+    def __init__(self, id: _Optional[str] = ..., value: _Optional[float] = ...) -> None: ...

@@ -17,7 +17,7 @@ from device.focstim.proto_api import FOCStimProtoAPI
 from device.focstim.notifications_pb2 import (NotificationBoot, NotificationDeviceVolume, NotificationCurrents, \
     NotificationOutputResistance, NotificationSkinResistance, NotificationSystemStats, NotificationSignalStats, NotificationBattery, \
     NotificationLSM6DSOX, NotificationButtonPress, NotificationDebugString, NotificationDebugAS5311, \
-    NotificationPressure, NotificationDebugTeleplot)
+    NotificationPressure, NotificationHallGirth, NotificationDebugTeleplot)
 from net.teleplot import Teleplot
 from device.output_device import OutputDevice
 from stim_math.audio_gen.base_classes import RemoteGenerationAlgorithm
@@ -29,6 +29,7 @@ from stim_math.sensors.as5311 import AS5311Data
 
 from stim_math.sensors.imu import IMUData
 from stim_math.sensors.pressure import PressureData
+from stim_math.sensors.drv5055 import DRV5055Data
 
 logger = logging.getLogger('restim.focstim')
 
@@ -204,6 +205,7 @@ class FOCStimProtoDevice(QObject, OutputDevice):
         self.api.on_notification_battery.connect(self.handle_notification_battery)
         self.api.on_notification_lsm6dsox.connect(self.handle_notification_lsm6dsox)
         self.api.on_notification_pressure.connect(self.handle_notification_pressure)
+        self.api.on_notification_hall_girth.connect(self.handle_notification_hall_girth)
         self.api.on_notification_button_press.connect(self.handle_notification_button_press)
         self.api.on_notification_debug_string.connect(self.handle_notification_debug_string)
         self.api.on_notification_debug_as5311.connect(self.handle_notification_debug_as5311)
@@ -509,6 +511,11 @@ class FOCStimProtoDevice(QObject, OutputDevice):
             PressureData(notif.pressure)
         )
 
+    def handle_notification_hall_girth(self, notif: NotificationHallGirth):
+        self.new_drv5055_sensor_data.emit(
+            DRV5055Data(delta=notif.delta, volts=notif.volts, raw=notif.raw)
+        )
+
     def handle_notification_button_press(self, notif: NotificationBoot):
         pass
 
@@ -536,6 +543,7 @@ class FOCStimProtoDevice(QObject, OutputDevice):
     new_imu_sensor_data = Signal(IMUData)
     new_as5311_sensor_data = Signal(AS5311Data)
     new_pressure_sensor_data = Signal(PressureData)
+    new_drv5055_sensor_data = Signal(DRV5055Data)
     new_battery_data = Signal(float)  # TODO: more battery stats
     new_device_volume_data = Signal(float)
     new_resistance_data = Signal(complex, complex, complex, complex)

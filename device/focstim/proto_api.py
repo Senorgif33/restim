@@ -14,7 +14,7 @@ from device.focstim.messages_pb2 import RequestFirmwareVersion, RequestAxisSet, 
     RequestLSM6DSOXStop, RequestLockDeviceVolume
 from device.focstim.notifications_pb2 import (NotificationBoot, NotificationDeviceVolume, NotificationCurrents, \
     NotificationOutputResistance, NotificationSkinResistance, NotificationSystemStats, NotificationSignalStats, \
-    NotificationBattery, NotificationLSM6DSOX, NotificationPressure, NotificationButtonPress, NotificationDebugString, \
+    NotificationBattery, NotificationLSM6DSOX, NotificationPressure, NotificationHallGirth, NotificationButtonPress, NotificationDebugString, \
     NotificationDebugAS5311, NotificationDebugTeleplot)
 
 logger = logging.getLogger('restim.focstim')
@@ -132,6 +132,8 @@ class FOCStimProtoAPI(QObject):
                 self.on_notification_lsm6dsox.emit(message.notification.notification_lsm6dsox)
             elif message.notification.HasField('notification_pressure'):
                 self.on_notification_pressure.emit(message.notification.notification_pressure)
+            elif message.notification.HasField('notification_hall_girth'):
+                self.on_notification_hall_girth.emit(message.notification.notification_hall_girth)
             elif message.notification.HasField('notification_button_press'):
                 self.on_notification_button_press.emit(message.notification.notification_button_press)
             elif message.notification.HasField('notification_debug_string'):
@@ -286,6 +288,7 @@ class FOCStimProtoAPI(QObject):
     on_notification_battery = Signal(NotificationBattery)
     on_notification_lsm6dsox = Signal(NotificationLSM6DSOX)
     on_notification_pressure = Signal(NotificationPressure)
+    on_notification_hall_girth = Signal(NotificationHallGirth)
     on_notification_button_press = Signal(NotificationButtonPress)
     on_notification_debug_string = Signal(NotificationDebugString)
     on_notification_debug_as5311 = Signal(NotificationDebugAS5311)

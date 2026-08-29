@@ -29,8 +29,10 @@ from qt_ui.sensors.imu_hip_thrust_node import IMUHipThrustNode
 from qt_ui.sensors.imu_velocity_node import IMUVelocityNode
 from qt_ui.sensors.pressure_absolute_node import PressureAbsoluteSensorNode
 from qt_ui.sensors.pressure_depletion_node import PressureDepletionSensorNode
+from qt_ui.sensors.drv5055_delta_node import DRV5055DeltaSensorNode
+from qt_ui.sensors.drv5055_absolute_node import DRV5055AbsoluteSensorNode
 from qt_ui.sensors.sensor_category import SensorCategory, SensorCategoryPressure, SensorCategoryAS5311, \
-    SensorCategoryIMU
+    SensorCategoryIMU, SensorCategoryDRV5055
 from qt_ui.sensors.sensor_node_interface import SensorNodeInterface
 from qt_ui.sensors_widget_ui import Ui_SensorsWidget
 
@@ -38,6 +40,8 @@ from qt_ui.sensors_widget_ui import Ui_SensorsWidget
 from stim_math.sensors.as5311 import AS5311Data
 from stim_math.sensors.imu import IMUData
 from stim_math.sensors.pressure import PressureData
+from stim_math.sensors.drv5055 import DRV5055Data, DRV5055GapModel
+from qt_ui import settings
 
 
 class SensorsWidget(QWidget, Ui_SensorsWidget):
@@ -68,6 +72,15 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
         category_pressure = SensorCategoryPressure()
         self.new_pressure_sensor_data_from_device.connect(category_pressure.sensor_data_from_device)
         self.new_pressure_sensor_data_from_network.connect(category_pressure.sensor_data_from_network)
+        category_drv5055 = SensorCategoryDRV5055()
+        rest_volts = settings.sensor_drv5055_rest_volts.get()
+        self._drv5055_gap_model = DRV5055GapModel(
+            rest_gap_mm=settings.sensor_drv5055_rest_gap_mm.get(),
+            rest_volts=rest_volts if rest_volts > 0 else None,
+        )
+        self.new_drv5055_sensor_data_from_device.connect(self._on_drv5055_from_device)
+        self.new_drv5055_sensor_data_from_network.connect(self._on_drv5055_from_network)
+        self._drv5055_to_category = category_drv5055
 
         self.structure = {
             category_imu : [
@@ -83,7 +96,11 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
             category_pressure: [
                 PressureAbsoluteSensorNode(),
                 PressureDepletionSensorNode(),
-            ]
+            ],
+            category_drv5055: [
+                DRV5055AbsoluteSensorNode(self._drv5055_gap_model),
+                DRV5055DeltaSensorNode(self._drv5055_gap_model),
+            ],
         }
 
         self.treeWidget.clear()
@@ -116,6 +133,11 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
 
                 try:
                     category_pressure.new_sensor_data.connect(node_class.new_pressure_sensor_data)
+                except AttributeError:
+                    pass
+
+                try:
+                    category_drv5055.new_sensor_data.connect(node_class.new_drv5055_sensor_data)
                 except AttributeError:
                     pass
 
@@ -213,6 +235,14 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
                     else:
                         node.process(parameters)
 
+    def _on_drv5055_from_device(self, data: DRV5055Data):
+        self._drv5055_gap_model.update(data)
+        self._drv5055_to_category.sensor_data_from_device(data)
+
+    def _on_drv5055_from_network(self, data: DRV5055Data):
+        self._drv5055_gap_model.update(data)
+        self._drv5055_to_category.sensor_data_from_network(data)
+
     def save_settings(self):
         for category_label, nodes in self.structure.items():
             category_label.save_settings()
@@ -225,3 +255,5 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
     new_imu_sensor_data_from_network = Signal(IMUData)
     new_pressure_sensor_data_from_device = Signal(PressureData)
     new_pressure_sensor_data_from_network = Signal(PressureData)
+    new_drv5055_sensor_data_from_device = Signal(DRV5055Data)
+    new_drv5055_sensor_data_from_network = Signal(DRV5055Data)
