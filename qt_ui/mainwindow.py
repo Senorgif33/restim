@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 from enum import Enum
@@ -29,6 +28,7 @@ import qt_ui.funscript_decomposition_dialog
 import qt_ui.preferences_dialog
 import qt_ui.about_dialog
 import qt_ui.settings
+import qt_ui.rest_control_api
 import net.serialproxy
 import net.buttplug_wsdm_client
 from qt_ui import resources
@@ -200,6 +200,9 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.http_server = net.http_server.HttpServer(self)
         self.http_server.route('/v1/status', self.api_status)
+        self.http_server.route('/v1/live', self.api_live)
+        self.http_server.route('/v1/state', self.api_state)
+        self.http_server.route('/v1/schema', self.api_schema)
         self.http_server.add_action('start', self.api_start)
         self.http_server.add_action('stop', self.api_stop)
 
@@ -709,6 +712,9 @@ class Window(QMainWindow, Ui_MainWindow):
         event.accept()
 
     def api_status(self, request: QHttpServerRequest):
+        # Thin compatibility endpoint; prefer GET /v1/state for full snapshot.
+        if request.method() != QHttpServerRequest.Method.Get:
+            return net.http_server.json_response({'ok': False, 'errors': ['method not allowed']})
         params = {
             "playing": self.playstate == PlayState.PLAYING,
             "volume": {
@@ -717,16 +723,35 @@ class Window(QMainWindow, Ui_MainWindow):
         }
         if self.last_device_volume is not None:
             params["volume"]["device"] = self.last_device_volume
-        return json.dumps(params)
+        return net.http_server.json_response(params)
+
+    def api_live(self, request: QHttpServerRequest):
+        return qt_ui.rest_control_api.handle_live_request(self, request)
+
+    def api_state(self, request: QHttpServerRequest):
+        return qt_ui.rest_control_api.handle_state_request(self, request)
+
+    def api_schema(self, request: QHttpServerRequest):
+        return qt_ui.rest_control_api.handle_schema_request(self, request)
 
     def api_start(self, request: QHttpServerRequest):
+        if request.method() not in (
+            QHttpServerRequest.Method.Post,
+            QHttpServerRequest.Method.Get,  # keep legacy callers working
+        ):
+            return net.http_server.json_response({'ok': False, 'errors': ['method not allowed']})
         if self.output_device is None:
             self.signal_start()
-        return "{}"
+        return net.http_server.json_response({})
 
     def api_stop(self, request: QHttpServerRequest):
+        if request.method() not in (
+            QHttpServerRequest.Method.Post,
+            QHttpServerRequest.Method.Get,
+        ):
+            return net.http_server.json_response({'ok': False, 'errors': ['method not allowed']})
         self.signal_stop()
-        return "{}"
+        return net.http_server.json_response({})
 
 
 def run():

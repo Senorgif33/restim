@@ -11,6 +11,12 @@ class FocStimDeviceStatsWidget(QtWidgets.QWidget, Ui_FocStimDeviceStatsWidget):
 
         self.transformer_max = 0
         self.voltage_max = 0
+        self.last_transformer = 0.0
+        self.last_voltage = 0.0
+        self.last_resistance_a = 0j
+        self.last_resistance_b = 0j
+        self.last_resistance_c = 0j
+        self.last_resistance_d = 0j
 
         self.label_a.setStyleSheet(self.stylesheet_with_color(COLOR_A))
         self.label_b.setStyleSheet(self.stylesheet_with_color(COLOR_B))
@@ -31,6 +37,8 @@ class FocStimDeviceStatsWidget(QtWidgets.QWidget, Ui_FocStimDeviceStatsWidget):
         """
 
     def update_utilization(self, transformer, voltage):
+        self.last_transformer = float(transformer)
+        self.last_voltage = float(voltage)
         self.transformer_max = max(transformer, self.transformer_max)
         self.voltage_max = max(voltage, self.voltage_max)
         self.label_transformer.setText(f"{transformer * 100:3.0f}%")
@@ -44,6 +52,10 @@ class FocStimDeviceStatsWidget(QtWidgets.QWidget, Ui_FocStimDeviceStatsWidget):
             b = np.clip(np.imag(x), -9999, 9999)
             return f"{a:3.0f}\r\n{b:3.0f}i"
 
+        self.last_resistance_a = a
+        self.last_resistance_b = b
+        self.last_resistance_c = c
+        self.last_resistance_d = d
         self.resistance_a.setText(format(a))
         self.resistance_b.setText(format(b))
         self.resistance_c.setText(format(c))

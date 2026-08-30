@@ -130,15 +130,15 @@ class FourphaseMotionGenerator(QtCore.QObject):
         if not self.any_scripts_loaded():
             if isinstance(self.pattern, MousePattern):
                 if self.pattern.use_lag_compensation():
+                    # External T-code/funscript is moving axes — follow the axis timeline.
                     a = self.intensity_a.interpolate(lagged_time)
                     b = self.intensity_b.interpolate(lagged_time)
                     c = self.intensity_c.interpolate(lagged_time)
                     d = self.intensity_d.interpolate(lagged_time)
                 else:
-                    a = self.intensity_a.last_value()
-                    b = self.intensity_b.last_value()
-                    c = self.intensity_c.last_value()
-                    d = self.intensity_d.last_value()
+                    # Hold last mouse position from the pattern object (not the
+                    # temporal axis timeline, which can disagree after latency).
+                    a, b, c, d = self.pattern.update(0)
                 self.position_updated.emit(a, b, c, d)
             else:
                 a, b, c, d = self.pattern.update(dt * self.velocity)
