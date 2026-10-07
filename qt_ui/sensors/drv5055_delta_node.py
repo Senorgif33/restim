@@ -60,7 +60,10 @@ class DRV5055DeltaSensorNode(QWidget, SensorNodeInterface):
         self.p2.setXLink(self.p1)
 
         self.p1.setLabels(left=('Gap', 'mm'))
+        self.p1.getAxis('left').enableAutoSIPrefix(False)
+        self.p1.getAxis('left').setTickSpacing(major=1, minor=1)
         self.p2.setLabels(left=('Δ gap', 'mm'))
+        self.p2.getAxis('left').enableAutoSIPrefix(False)
 
         self.p1.addLegend(offset=(30, 5))
         self.p2.addLegend(offset=(30, 5))
@@ -78,7 +81,7 @@ class DRV5055DeltaSensorNode(QWidget, SensorNodeInterface):
         self.high_marker = pg.InfiniteLine(10, 0, movable=False, pen=styles.yellow_line_dash)
         self.p2.addItem(self.high_marker)
 
-        self.p1.setXRange(-10, 0, padding=0.05)
+        self.p1.setXRange(-self.TRACE_WINDOW_SEC, 0, padding=0.05)
 
         self.delta_mm = 0.0
 
@@ -104,7 +107,7 @@ class DRV5055DeltaSensorNode(QWidget, SensorNodeInterface):
         self.y_gap.append(data.gap_mm)
         self.y_delta.append(self.delta_mm)
 
-        threshold = time.time() - 10
+        threshold = time.time() - self.TRACE_WINDOW_SEC
         while len(self.x) and self.x[0] < threshold:
             del self.x[0]
             del self.y_gap[0]
@@ -138,6 +141,40 @@ class DRV5055DeltaSensorNode(QWidget, SensorNodeInterface):
     def update_suppression_display(self, suppression: float):
         self.label_suppression.setText(f'{suppression * 100:.0f}%')
         self.label_suppressed_value.setText(f'{self.spinbox_volume.value() * (1 - suppression):.1f}%')
+
+    def get_remote_trace(self) -> dict:
+        series = self._trace_series(self.y_gap)
+        series2 = self._trace_series(self.y_delta)
+        times = self._trace_times(self.x)
+        vol = float(self.spinbox_volume.value())
+        return {
+            'unit': 'mm',
+            'label': 'gap',
+            'value': float(self.y_gap[-1]) if self.y_gap else None,
+            'series': series,
+            'times': times,
+            'label2': 'Δ gap',
+            'series2': series2,
+            'params': {
+                'threshold': float(self.spinbox_threshold.value()),
+                'thresholdRange': float(self.spinbox_range.value()),
+                'volumePct': vol,
+                'absolute': bool(self.checkbox.isChecked()),
+                'suppression': 0.0,
+                'suppressedValuePct': vol,
+            },
+        }
+
+    def apply_remote_settings(self, params: dict) -> list:
+        applied = []
+        self._set_spin(self.spinbox_threshold, 'threshold', params, applied)
+        self._set_spin(self.spinbox_range, 'thresholdRange', params, applied)
+        self._set_spin(self.spinbox_volume, 'volumePct', params, applied)
+        self._set_check(self.checkbox, 'absolute', params, applied)
+        if applied:
+            self.update_lines()
+            self.save_settings()
+        return applied
 
     def save_settings(self):
         settings.sensor_drv5055_delta_threshold.set(self.spinbox_threshold.value())

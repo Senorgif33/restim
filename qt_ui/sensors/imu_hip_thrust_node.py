@@ -78,7 +78,7 @@ class IMUHipThrustNode(QtWidgets.QWidget, SensorNodeInterface):
         self.velocity_plot_item.setPen(styles.orange_line)
         self.p2.addItem(self.velocity_plot_item)
 
-        self.p1.setXRange(-10, 0, padding=0.05)
+        self.p1.setXRange(-self.TRACE_WINDOW_SEC, 0, padding=0.05)
 
         # setup algorithm variables
         self.filter = IMUForwardPositionFilter(LSM6DSOX_SAMPLERATE_HZ)
@@ -99,7 +99,7 @@ class IMUHipThrustNode(QtWidgets.QWidget, SensorNodeInterface):
         self.x.append(time.time())
         self.y_pos.append(self.filter.last_position())
         self.y_velo.append(self.filter.last_velocity())
-        threshold = self.x[-1] - 10
+        threshold = self.x[-1] - self.TRACE_WINDOW_SEC
         while len(self.x) and self.x[0] <= threshold:
             del self.x[0]
             del self.y_pos[0]
@@ -156,6 +156,44 @@ class IMUHipThrustNode(QtWidgets.QWidget, SensorNodeInterface):
         self.label_suppression.setText(f'{suppression * 100:.0f}%')
         self.label_suppressed_value.setText(f'{self.spinbox_volume.value() * (1 - suppression):.1f}%')
         self.label_position_suppressed_value.setText(f'{self.spinbox_position_volume.value() * (1 - suppression):.1f}%')
+
+    def get_remote_trace(self) -> dict:
+        series = self._trace_series(self.y_pos)
+        series2 = self._trace_series(self.y_velo)
+        times = self._trace_times(self.x)
+        vol = float(self.spinbox_volume.value())
+        pos_vol = float(self.spinbox_position_volume.value())
+        return {
+            'unit': 'm',
+            'label': 'position',
+            'value': float(self.filter.last_position()) if series else None,
+            'series': series,
+            'times': times,
+            'label2': 'velocity',
+            'unit2': 'm/s',
+            'series2': series2,
+            'params': {
+                'positionAmplitude': float(self.spinbox_position.value()),
+                'alphaAmplitude': float(self.spinbox_alpha.value()),
+                'positionVolumePct': pos_vol,
+                'velocityAmplitude': float(self.spinbox_velocity.value()),
+                'volumePct': vol,
+                'suppression': 0.0,
+                'suppressedValuePct': vol,
+                'positionSuppressedValuePct': pos_vol,
+            },
+        }
+
+    def apply_remote_settings(self, params: dict) -> list:
+        applied = []
+        self._set_spin(self.spinbox_position, 'positionAmplitude', params, applied)
+        self._set_spin(self.spinbox_alpha, 'alphaAmplitude', params, applied)
+        self._set_spin(self.spinbox_position_volume, 'positionVolumePct', params, applied)
+        self._set_spin(self.spinbox_velocity, 'velocityAmplitude', params, applied)
+        self._set_spin(self.spinbox_volume, 'volumePct', params, applied)
+        if applied:
+            self.save_settings()
+        return applied
 
     def save_settings(self):
         settings.sensor_imu_hipthrust_position.set(self.spinbox_position.value())

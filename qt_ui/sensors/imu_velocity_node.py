@@ -73,7 +73,7 @@ class IMUVelocityNode(QtWidgets.QWidget, SensorNodeInterface):
         self.high_marker = pg.InfiniteLine(10, 0, movable=False, pen=styles.yellow_line_dash)
         self.p1.addItem(self.high_marker)
 
-        self.p1.setXRange(-10, 0, padding=0.05)
+        self.p1.setXRange(-self.TRACE_WINDOW_SEC, 0, padding=0.05)
 
         # setup algorithm variables
         self.value = 0
@@ -101,7 +101,7 @@ class IMUVelocityNode(QtWidgets.QWidget, SensorNodeInterface):
 
         self.x.append(time.time())
         self.y.append(self.value)
-        threshold = self.x[-1] - 10
+        threshold = self.x[-1] - self.TRACE_WINDOW_SEC
         while len(self.x) and self.x[0] <= threshold:
             del self.x[0]
             del self.y[0]
@@ -134,6 +134,37 @@ class IMUVelocityNode(QtWidgets.QWidget, SensorNodeInterface):
     def update_suppression_display(self, suppression: float):
         self.label_suppression.setText(f'{suppression * 100:.0f}%')
         self.label_suppressed_value.setText(f'{self.spinbox_volume.value() * (1 - suppression):.1f}%')
+
+    def get_remote_trace(self) -> dict:
+        series = self._trace_series(self.y)
+        times = self._trace_times(self.x)
+        vol = float(self.spinbox_volume.value())
+        return {
+            'unit': '°/s',
+            'label': 'movement',
+            'value': float(self.value) if series else None,
+            'series': series,
+            'times': times,
+            'params': {
+                'threshold': float(self.spinbox_threshold.value()),
+                'thresholdRange': float(self.spinbox_range.value()),
+                'volumePct': vol,
+                'decaySec': float(self.spinbox_decay.value()),
+                'suppression': 0.0,
+                'suppressedValuePct': vol,
+            },
+        }
+
+    def apply_remote_settings(self, params: dict) -> list:
+        applied = []
+        self._set_spin(self.spinbox_threshold, 'threshold', params, applied)
+        self._set_spin(self.spinbox_range, 'thresholdRange', params, applied)
+        self._set_spin(self.spinbox_volume, 'volumePct', params, applied)
+        self._set_spin(self.spinbox_decay, 'decaySec', params, applied)
+        if applied:
+            self.update_lines()
+            self.save_settings()
+        return applied
 
     def save_settings(self):
         settings.sensor_imu_velocity_threshold.set(self.spinbox_threshold.value())

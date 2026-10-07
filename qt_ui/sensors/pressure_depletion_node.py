@@ -66,7 +66,7 @@ class PressureDepletionSensorNode(QWidget, SensorNodeInterface):
         self.arousal_threshold_marker = pg.InfiniteLine(1, 0, movable=False)
         self.p2.addItem(self.arousal_threshold_marker)
 
-        self.p1.setXRange(-10, 0, padding=0.05)
+        self.p1.setXRange(-self.TRACE_WINDOW_SEC, 0, padding=0.05)
 
         # setup algorithm variables
         self.pressure = 0
@@ -97,7 +97,7 @@ class PressureDepletionSensorNode(QWidget, SensorNodeInterface):
         self.y_pressure.append(data.pressure)
         self.y_arousal.append(self.eom_controller.arousal)
 
-        threshold = time.time() - 10
+        threshold = time.time() - self.TRACE_WINDOW_SEC
         while len(self.x) and self.x[0] < threshold:
             del self.x[0]
             del self.y_pressure[0]
@@ -117,6 +117,36 @@ class PressureDepletionSensorNode(QWidget, SensorNodeInterface):
 
         y2 = np.array(self.y_arousal)
         self.arousal_plot_item.setData(x=x, y=y2)
+
+    def get_remote_trace(self) -> dict:
+        series = self._trace_series(self.y_pressure)
+        series2 = self._trace_series(self.y_arousal)
+        times = self._trace_times(self.x)
+        return {
+            'unit': 'Pa',
+            'label': 'pressure',
+            'value': float(self.y_pressure[-1]) if self.y_pressure else None,
+            'series': series,
+            'times': times,
+            'label2': 'arousal',
+            'series2': series2,
+            'params': {
+                'arousalThreshold': float(self.spinbox_arousal_threshold.value()),
+                'rampTimeSec': float(self.spinbox_ramp_time.value()),
+                'startVolumePct': float(self.spinbox_start_volume.value()),
+                'effectiveVolumePct': float(self.eom_controller.speed) * 100.0,
+            },
+        }
+
+    def apply_remote_settings(self, params: dict) -> list:
+        applied = []
+        self._set_spin(self.spinbox_arousal_threshold, 'arousalThreshold', params, applied)
+        self._set_spin(self.spinbox_ramp_time, 'rampTimeSec', params, applied)
+        self._set_spin(self.spinbox_start_volume, 'startVolumePct', params, applied)
+        if applied:
+            self.update_lines()
+            self.save_settings()
+        return applied
 
     def update_lines(self, *args, **kwargs):
         self.arousal_threshold_marker.setValue(self.spinbox_arousal_threshold.value())

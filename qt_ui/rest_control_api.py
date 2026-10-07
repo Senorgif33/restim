@@ -212,26 +212,80 @@ def _three_phase_cal(window) -> dict:
     }
 
 
-def _sensor_nodes(window) -> list:
+def _sensor_nodes(window, *, include_series: bool = True) -> list:
     nodes = []
     sensors = window.page_sensors
+    suppression = float(np.clip(getattr(sensors, '_last_suppression', 0.0) or 0.0, 0.0, 1.0))
     for category, node_list in sensors.structure.items():
         cat_title = getattr(category, 'TITLE', category.__class__.__name__)
         for node in node_list:
-            nodes.append({
+            trace = {}
+            try:
+                trace = node.get_remote_trace() or {}
+            except Exception:
+                logger.exception('sensor get_remote_trace failed for %s/%s', cat_title, node.TITLE)
+            value = trace.get('value')
+            if value is not None:
+                try:
+                    value = float(value)
+                except (TypeError, ValueError):
+                    value = None
+            params = dict(trace.get('params') or {})
+            if 'suppression' in params or 'volumePct' in params:
+                params['suppression'] = suppression
+                if 'volumePct' in params:
+                    try:
+                        params['suppressedValuePct'] = float(params['volumePct']) * (1.0 - suppression)
+                    except (TypeError, ValueError):
+                        pass
+                if 'positionVolumePct' in params:
+                    try:
+                        params['positionSuppressedValuePct'] = (
+                            float(params['positionVolumePct']) * (1.0 - suppression)
+                        )
+                    except (TypeError, ValueError):
+                        pass
+            entry = {
                 'id': f"{cat_title}/{node.TITLE}",
                 'category': cat_title,
                 'title': node.TITLE,
                 'enabled': bool(node.is_node_enabled()),
-            })
+                'unit': str(trace.get('unit') or ''),
+                'label': str(trace.get('label') or 'value'),
+                'value': value,
+                'params': params,
+            }
+            if include_series:
+                series = trace.get('series') or []
+                times = trace.get('times') or []
+                series2 = trace.get('series2') or []
+                # Keep full TRACE_WINDOW (do not clip to 200 — that was ~5s at 40Hz).
+                if isinstance(series, list):
+                    entry['series'] = [float(v) for v in series[-2500:]]
+                else:
+                    entry['series'] = []
+                if isinstance(times, list):
+                    entry['times'] = [float(v) for v in times[-2500:]]
+                else:
+                    entry['times'] = []
+                if isinstance(series2, list) and series2:
+                    entry['series2'] = [float(v) for v in series2[-2500:]]
+                    entry['label2'] = str(trace.get('label2') or '')
+                    entry['unit2'] = str(trace.get('unit2') or entry['unit'])
+            nodes.append(entry)
     return nodes
 
 
+def _volume_ducking(window) -> float:
+    """Fraction of volume removed by sensor nodes (not S1 suppression)."""
+    sensors = window.page_sensors
+    return float(np.clip(getattr(sensors, '_last_volume_ducking', 0.0) or 0.0, 0.0, 1.0))
+
+
 def _sensors_state(window) -> dict:
-    nodes = _sensor_nodes(window)
+    nodes = _sensor_nodes(window, include_series=True)
     any_enabled = any(n['enabled'] for n in nodes)
-    ducking = float(np.clip(window.sensor_suppression.interpolate(time.time()), 0.0, 1.0))
-    # Keep history short; remote client can also accumulate from ducking
+    ducking = _volume_ducking(window)
     hist = list(getattr(window, '_rest_sensor_history', []) or [])
     return {
         'enabled': any_enabled,
@@ -268,7 +322,7 @@ def build_live(window) -> dict:
     """Lightweight snapshot for high-rate visualizer polling (skip cal/pulse/history/nodes)."""
     config = DeviceConfiguration.from_settings()
     mode = _phase_mode(config)
-    ducking = float(np.clip(window.sensor_suppression.interpolate(time.time()), 0.0, 1.0))
+    ducking = _volume_ducking(window)
     vol = _volume_state(window)
     four = _four_phase_live(window)
     three = _three_phase_live(window)
@@ -286,11 +340,8 @@ def build_live(window) -> dict:
         'voltageMaxPct': three['device']['voltageMaxPct'],
     }
     from qt_ui.mainwindow import PlayState
-    any_sensor = any(
-        node.is_node_enabled()
-        for nodes in window.page_sensors.structure.values()
-        for node in nodes
-    )
+    sensor_nodes = _sensor_nodes(window, include_series=True)
+    any_sensor = any(n['enabled'] for n in sensor_nodes)
     return {
         'transport': {
             'playing': window.playstate == PlayState.PLAYING,
@@ -321,6 +372,7 @@ def build_live(window) -> dict:
             'enabled': any_sensor,
             'level': ducking,
             'ducking': ducking,
+            'nodes': sensor_nodes,
         },
         'drivenByVector': _driven_by_vector(window),
     }
@@ -330,12 +382,12 @@ def build_state(window) -> dict:
     config = DeviceConfiguration.from_settings()
     mode = _phase_mode(config)
 
-    # Sample sensor history at most ~10 Hz so LAN polls stay light
+    # Sample volume-ducking history at most ~10 Hz so LAN polls stay light
     hist = getattr(window, '_rest_sensor_history', None)
     if hist is None:
         hist = deque(maxlen=60)
         window._rest_sensor_history = hist
-    ducking = float(np.clip(window.sensor_suppression.interpolate(time.time()), 0.0, 1.0))
+    ducking = _volume_ducking(window)
     now = time.time()
     last_t = getattr(window, '_rest_sensor_history_t', 0.0)
     if now - last_t >= 0.1:
@@ -615,6 +667,14 @@ def apply_patch(window, patch: dict) -> dict:
                         applied.append(f"sensors.nodes[{item['id']}].enabled")
                     except Exception as e:
                         errors.append(f"sensors.nodes[{item['id']}]: {e}")
+                params = item.get('params')
+                if isinstance(params, dict) and params:
+                    try:
+                        applied_keys = node.apply_remote_settings(params) or []
+                        for key in applied_keys:
+                            applied.append(f"sensors.nodes[{item['id']}].params.{key}")
+                    except Exception as e:
+                        errors.append(f"sensors.nodes[{item['id']}].params: {e}")
             window.page_sensors.refresh_labels()
         for key in sensors:
             if key not in ('enabled', 'nodes'):

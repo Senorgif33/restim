@@ -147,6 +147,8 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
 
         self.axis_sensor_suppression = None
         self._last_suppression = 0.0
+        # Fraction of volume removed by enabled sensor nodes (0 = none, 1 = muted).
+        self._last_volume_ducking = 0.0
 
         self._suppression_display_timer = QTimer()
         self._suppression_display_timer.setInterval(200)
@@ -222,18 +224,26 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
             suppression = float(np.clip(self.axis_sensor_suppression.interpolate(time.time()), 0, 1))
         self._last_suppression = suppression
 
+        volume_before = parameters['volume'] if 'volume' in parameters else None
+
         for category_label, nodes in self.structure.items():
             for node in nodes:
                 if node.is_node_enabled():
                     if suppression > 0 and 'volume' in parameters:
-                        volume_before = parameters['volume']
+                        node_before = parameters['volume']
                         node.process(parameters)
-                        if volume_before > 0:
-                            adjustment = parameters['volume'] / volume_before
+                        if node_before > 0:
+                            adjustment = parameters['volume'] / node_before
                             suppressed_adjustment = adjustment + (1 - adjustment) * suppression
-                            parameters['volume'] = volume_before * suppressed_adjustment
+                            parameters['volume'] = node_before * suppressed_adjustment
                     else:
                         node.process(parameters)
+
+        # Only update ducking when volume was in the parameter dict (FOC / audio path).
+        if volume_before is not None and volume_before > 0 and 'volume' in parameters:
+            self._last_volume_ducking = float(
+                np.clip(1.0 - float(parameters['volume']) / float(volume_before), 0.0, 1.0)
+            )
 
     def _on_drv5055_from_device(self, data: DRV5055Data):
         self._drv5055_gap_model.update(data)
