@@ -23,7 +23,7 @@ class DRV5055GapModel:
     One-shot rest calibration: measure volts at known rest gap → magnet constant K.
     """
 
-    def __init__(self, rest_gap_mm: float = 6.28, rest_volts: float | None = None):
+    def __init__(self, rest_gap_mm: float = 5.1, rest_volts: float | None = None):
         self.rest_gap_mm = rest_gap_mm
         self.rest_volts = rest_volts
         self._k = None

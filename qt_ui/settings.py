@@ -207,7 +207,7 @@ sensor_pressure_absolute_threshold = Setting('sensor_pressure_absolute/threshold
 sensor_pressure_absolute_range = Setting('sensor_pressure_absolute/range', 10000, float)
 sensor_pressure_absolute_volume = Setting('sensor_pressure_absolute/volume', 0, float)
 
-sensor_drv5055_rest_gap_mm = Setting('sensor_drv5055/rest_gap_mm', 6.28, float)
+sensor_drv5055_rest_gap_mm = Setting('sensor_drv5055/rest_gap_mm', 5.1, float)
 sensor_drv5055_rest_volts = Setting('sensor_drv5055/rest_volts', 0.0, float)
 
 sensor_drv5055_absolute_threshold = Setting('sensor_drv5055_absolute/threshold', 6.28, float)

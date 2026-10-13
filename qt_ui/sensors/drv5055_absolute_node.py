@@ -33,7 +33,7 @@ class DRV5055AbsoluteSensorNode(QWidget, SensorNodeInterface):
         self.verticalLayout.addWidget(self.groupbox)
         self.formLayout = QFormLayout(self.groupbox)
 
-        self.spinbox_rest_gap = pg.SpinBox(None, 6.28, compactHeight=False, suffix='mm', siPrefix=False, dec=True, minStep=0.01, bounds=[0.1, None])
+        self.spinbox_rest_gap = pg.SpinBox(None, 5.1, compactHeight=False, suffix='mm', siPrefix=False, dec=True, minStep=0.01, bounds=[0.1, None])
         self.button_set_rest = QPushButton("set rest")
         self.label_cal = QLabel("not calibrated")
         self.spinbox_threshold = pg.SpinBox(None, 6.28, compactHeight=False, suffix='mm', siPrefix=False, dec=True, minStep=0.01)
