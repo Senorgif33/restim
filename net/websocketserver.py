@@ -23,6 +23,7 @@ class WebSocketServer(QtCore.QObject):
     def __init__(self, parent):
         super().__init__(parent)
         self.handlers = []
+        self._drv5055_settings = None
 
         enabled = settings.websocket_enabled.get()
         port = settings.websocket_port.get()
@@ -67,7 +68,11 @@ class WebSocketServer(QtCore.QObject):
         elif path == '/sensors/drv5055':
             handler = WebsocketDRV5055Handler(websocket)
             handler.new_drv5055_data.connect(self.incoming_drv5055_data)
+            handler.new_drv5055_settings.connect(self.incoming_drv5055_settings)
             self.transmit_drv5055_data.connect(handler.transmit_drv5055_data)
+            self.transmit_drv5055_settings.connect(handler.transmit_settings)
+            if self._drv5055_settings is not None:
+                handler.transmit_settings(self._drv5055_settings)
             handler.disconnected.connect(self.clientDisconnected)
             self.handlers.append(handler)
         elif path == '/sensors/imu':
@@ -83,6 +88,10 @@ class WebSocketServer(QtCore.QObject):
     def clientDisconnected(self):
         self.handlers = [handler for handler in self.handlers if handler.is_connected()]
 
+    def update_drv5055_settings(self, payload: dict):
+        self._drv5055_settings = payload
+        self.transmit_drv5055_settings.emit(payload)
+
     new_tcode_command = QtCore.Signal(TCodeCommand)
 
     transmit_as5311_data = Signal(AS5311Data)
@@ -93,6 +102,8 @@ class WebSocketServer(QtCore.QObject):
 
     transmit_drv5055_data = Signal(DRV5055Data)
     incoming_drv5055_data = Signal(DRV5055Data)
+    transmit_drv5055_settings = Signal(object)
+    incoming_drv5055_settings = Signal(object)
 
     transmit_imu_data = Signal(IMUData)
     incoming_imu_data = Signal(IMUData)

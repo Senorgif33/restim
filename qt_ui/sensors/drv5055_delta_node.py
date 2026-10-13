@@ -1,5 +1,6 @@
 import time
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QFormLayout, QVBoxLayout, QGroupBox, QLabel, QCheckBox
 
 import pyqtgraph as pg
@@ -22,6 +23,7 @@ class DRV5055DeltaSensorNode(QWidget, SensorNodeInterface):
     def __init__(self, gap_model: DRV5055GapModel):
         super().__init__()
         self.gap_model = gap_model
+        self._suppress_publish = False
 
         # setup UI
         self.verticalLayout = QVBoxLayout(self)
@@ -91,6 +93,23 @@ class DRV5055DeltaSensorNode(QWidget, SensorNodeInterface):
 
         self.load_settings()
         self.update_lines()
+
+        self.spinbox_threshold.valueChanged.connect(self._emit_locked_change)
+        self.spinbox_range.valueChanged.connect(self._emit_locked_change)
+        self.checkbox.toggled.connect(self._emit_locked_change)
+
+    def _emit_locked_change(self, *args):
+        if self._suppress_publish:
+            return
+        self.locked_settings_changed.emit()
+
+    def set_inherited_locked(self, locked: bool):
+        enabled = not locked
+        self.spinbox_threshold.setEnabled(enabled)
+        self.spinbox_range.setEnabled(enabled)
+        self.checkbox.setEnabled(enabled)
+
+    locked_settings_changed = Signal()
 
     def new_drv5055_sensor_data(self, data: DRV5055Data):
         if not self.is_node_enabled():
@@ -164,6 +183,15 @@ class DRV5055DeltaSensorNode(QWidget, SensorNodeInterface):
                 'suppressedValuePct': vol,
             },
         }
+
+    def apply_inherited_settings(self, params: dict) -> list:
+        params = dict(params)
+        params.pop('volumePct', None)
+        self._suppress_publish = True
+        try:
+            return self.apply_remote_settings(params)
+        finally:
+            self._suppress_publish = False
 
     def apply_remote_settings(self, params: dict) -> list:
         applied = []

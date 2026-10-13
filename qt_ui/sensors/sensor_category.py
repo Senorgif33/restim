@@ -195,13 +195,27 @@ class SensorCategoryDRV5055(SensorCategory):
                    "Calibrate rest gap on the absolute page before using mm modes.")
     URL_FORMAT_STRING = "ws://localhost:{port}/sensors/drv5055"
 
-    def __init__(self):
+    def __init__(self, gap_model):
+        self.gap_model = gap_model
         super().__init__()
 
     def create_handler(self, websocket):
         handler = WebsocketDRV5055Handler(websocket)
-        handler.new_drv5055_data.connect(self.new_sensor_data)
+        handler.new_drv5055_data.connect(self._on_pulled_sample)
+        handler.new_drv5055_settings.connect(self._on_pulled_settings)
         return handler
+
+    def _on_pulled_sample(self, data):
+        self.gap_model.update(data)
+        if self.radio_pull_data.isChecked():
+            self.new_sensor_data.emit(data)
+
+    def _on_pulled_settings(self, payload):
+        if self.radio_device.isChecked():
+            return
+        self.remote_settings.emit(payload)
+
+    remote_settings = Signal(object)
 
     def reload_settings(self):
         button_id = settings.sensor_drv5055_source_index.get()

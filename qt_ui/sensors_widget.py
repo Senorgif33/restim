@@ -72,12 +72,12 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
         category_pressure = SensorCategoryPressure()
         self.new_pressure_sensor_data_from_device.connect(category_pressure.sensor_data_from_device)
         self.new_pressure_sensor_data_from_network.connect(category_pressure.sensor_data_from_network)
-        category_drv5055 = SensorCategoryDRV5055()
         rest_volts = settings.sensor_drv5055_rest_volts.get()
         self._drv5055_gap_model = DRV5055GapModel(
             rest_gap_mm=settings.sensor_drv5055_rest_gap_mm.get(),
             rest_volts=rest_volts if rest_volts > 0 else None,
         )
+        category_drv5055 = SensorCategoryDRV5055(self._drv5055_gap_model)
         self.new_drv5055_sensor_data_from_device.connect(self._on_drv5055_from_device)
         self.new_drv5055_sensor_data_from_network.connect(self._on_drv5055_from_network)
         self._drv5055_to_category = category_drv5055
@@ -142,6 +142,13 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
                     pass
 
         self.treeWidget.expandAll()
+        self._drv5055_absolute = self.structure[category_drv5055][0]
+        self._drv5055_delta = self.structure[category_drv5055][1]
+        category_drv5055.buttonGroup.buttonToggled.connect(self._drv5055_source_changed)
+        category_drv5055.remote_settings.connect(self.apply_drv5055_remote_settings)
+        self._drv5055_absolute.locked_settings_changed.connect(self.publish_drv5055_settings)
+        self._drv5055_delta.locked_settings_changed.connect(self.publish_drv5055_settings)
+        self._drv5055_source_changed()
         self.treeWidget.itemSelectionChanged.connect(self.index_changed)
         self.checkBox.clicked.connect(self.checkbox_clicked)
 
@@ -245,6 +252,54 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
                 np.clip(1.0 - float(parameters['volume']) / float(volume_before), 0.0, 1.0)
             )
 
+    def _drv5055_source_changed(self, *args):
+        locked = not self._drv5055_to_category.radio_device.isChecked()
+        self._drv5055_absolute.set_inherited_locked(locked)
+        self._drv5055_delta.set_inherited_locked(locked)
+
+    def apply_drv5055_remote_settings(self, payload):
+        if self._drv5055_to_category.radio_device.isChecked():
+            return
+        if not isinstance(payload, dict):
+            return
+        absolute = payload.get('absolute') if isinstance(payload.get('absolute'), dict) else {}
+        inherited = {}
+        if 'restVolts' in payload:
+            inherited['restVolts'] = payload['restVolts']
+        if 'restGapMm' in payload:
+            inherited['restGapMm'] = payload['restGapMm']
+        for key in ('threshold', 'thresholdRange'):
+            if key in absolute:
+                inherited[key] = absolute[key]
+        if inherited:
+            self._drv5055_absolute.apply_inherited_settings(inherited)
+
+        delta = payload.get('delta') if isinstance(payload.get('delta'), dict) else {}
+        inherited_delta = {}
+        for key in ('threshold', 'thresholdRange', 'absolute'):
+            if key in delta:
+                inherited_delta[key] = delta[key]
+        if inherited_delta:
+            self._drv5055_delta.apply_inherited_settings(inherited_delta)
+
+    def publish_drv5055_settings(self):
+        rest_volts = self._drv5055_gap_model.rest_volts
+        payload = {
+            'type': 'settings',
+            'restVolts': float(rest_volts) if rest_volts is not None else 0.0,
+            'restGapMm': float(self._drv5055_absolute.spinbox_rest_gap.value()),
+            'absolute': {
+                'threshold': float(self._drv5055_absolute.spinbox_threshold.value()),
+                'thresholdRange': float(self._drv5055_absolute.spinbox_range.value()),
+            },
+            'delta': {
+                'threshold': float(self._drv5055_delta.spinbox_threshold.value()),
+                'thresholdRange': float(self._drv5055_delta.spinbox_range.value()),
+                'absolute': bool(self._drv5055_delta.checkbox.isChecked()),
+            },
+        }
+        self.drv5055_settings_snapshot.emit(payload)
+
     def _on_drv5055_from_device(self, data: DRV5055Data):
         self._drv5055_gap_model.update(data)
         self._drv5055_to_category.sensor_data_from_device(data)
@@ -267,3 +322,4 @@ class SensorsWidget(QWidget, Ui_SensorsWidget):
     new_pressure_sensor_data_from_network = Signal(PressureData)
     new_drv5055_sensor_data_from_device = Signal(DRV5055Data)
     new_drv5055_sensor_data_from_network = Signal(DRV5055Data)
+    drv5055_settings_snapshot = Signal(object)

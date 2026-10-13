@@ -197,6 +197,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.websocket_server.incoming_imu_data.connect(self.page_sensors.new_imu_sensor_data_from_network)
         self.websocket_server.incoming_pressure_data.connect(self.page_sensors.new_pressure_sensor_data_from_network)
         self.websocket_server.incoming_drv5055_data.connect(self.page_sensors.new_drv5055_sensor_data_from_network)
+        self.websocket_server.incoming_drv5055_settings.connect(self.page_sensors.apply_drv5055_remote_settings)
+        self.page_sensors.drv5055_settings_snapshot.connect(self.websocket_server.update_drv5055_settings)
+        self.page_sensors.publish_drv5055_settings()
 
         self.http_server = net.http_server.HttpServer(self)
         self.http_server.route('/v1/status', self.api_status)
@@ -278,6 +281,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.autostart_timer.setSingleShot(True)
         self.autostart_timer.timeout.connect(self.autostart_timeout)
         self.autostart_timer.setInterval(5000)
+
+        # Media page emits funscriptMappingChanged during setupUi, before this slot exists.
+        self.funscript_mapping_changed()
 
     def connect_signals_slots_actionbar(self):
         def uncheck():

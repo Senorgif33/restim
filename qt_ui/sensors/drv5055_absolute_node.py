@@ -1,5 +1,6 @@
 import time
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QFormLayout, QVBoxLayout, QGroupBox, QLabel, QPushButton
 
 import pyqtgraph as pg
@@ -23,6 +24,7 @@ class DRV5055AbsoluteSensorNode(QWidget, SensorNodeInterface):
         super().__init__()
         self.gap_model = gap_model
         self._latest_volts = None
+        self._suppress_publish = False
 
         # setup UI
         self.verticalLayout = QVBoxLayout(self)
@@ -94,6 +96,25 @@ class DRV5055AbsoluteSensorNode(QWidget, SensorNodeInterface):
         self.load_settings()
         self._refresh_cal_label()
         self.update_lines()
+
+        self.spinbox_rest_gap.valueChanged.connect(self._emit_locked_change)
+        self.spinbox_threshold.valueChanged.connect(self._emit_locked_change)
+        self.spinbox_range.valueChanged.connect(self._emit_locked_change)
+        self.button_set_rest.clicked.connect(self._emit_locked_change)
+
+    def _emit_locked_change(self, *args):
+        if self._suppress_publish:
+            return
+        self.locked_settings_changed.emit()
+
+    def set_inherited_locked(self, locked: bool):
+        enabled = not locked
+        self.spinbox_rest_gap.setEnabled(enabled)
+        self.button_set_rest.setEnabled(enabled)
+        self.spinbox_threshold.setEnabled(enabled)
+        self.spinbox_range.setEnabled(enabled)
+
+    locked_settings_changed = Signal()
 
     def _rest_gap_changed(self, *args):
         self.gap_model.rest_gap_mm = self.spinbox_rest_gap.value()
@@ -205,8 +226,28 @@ class DRV5055AbsoluteSensorNode(QWidget, SensorNodeInterface):
             },
         }
 
+    def apply_inherited_settings(self, params: dict) -> list:
+        params = dict(params)
+        params.pop('volumePct', None)
+        params.pop('decaySec', None)
+        self._suppress_publish = True
+        try:
+            return self.apply_remote_settings(params)
+        finally:
+            self._suppress_publish = False
+
     def apply_remote_settings(self, params: dict) -> list:
         applied = []
+        if 'restVolts' in params:
+            try:
+                volts = float(params['restVolts'])
+                if volts > 0:
+                    gap = float(params['restGapMm']) if 'restGapMm' in params else self.spinbox_rest_gap.value()
+                    self.gap_model.set_rest(volts, gap)
+                    applied.append('restVolts')
+                    self._refresh_cal_label()
+            except (TypeError, ValueError):
+                pass
         self._set_spin(self.spinbox_rest_gap, 'restGapMm', params, applied)
         self._set_spin(self.spinbox_threshold, 'threshold', params, applied)
         self._set_spin(self.spinbox_range, 'thresholdRange', params, applied)
