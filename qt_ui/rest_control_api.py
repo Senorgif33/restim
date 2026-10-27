@@ -212,7 +212,13 @@ def _three_phase_cal(window) -> dict:
     }
 
 
-def _sensor_nodes(window, *, include_series: bool = True) -> list:
+def _sensor_nodes(window, *, include_series: bool = False) -> list:
+    """
+    Build sensor node list for /v1/state or /v1/live.
+
+    include_series: when True, attach full TRACE_WINDOW series/times only for
+    **enabled** nodes (disabled stay value+params). State should pass False.
+    """
     nodes = []
     sensors = window.page_sensors
     suppression = float(np.clip(getattr(sensors, '_last_suppression', 0.0) or 0.0, 0.0, 1.0))
@@ -245,29 +251,33 @@ def _sensor_nodes(window, *, include_series: bool = True) -> list:
                         )
                     except (TypeError, ValueError):
                         pass
+            enabled = bool(node.is_node_enabled())
             entry = {
                 'id': f"{cat_title}/{node.TITLE}",
                 'category': cat_title,
                 'title': node.TITLE,
-                'enabled': bool(node.is_node_enabled()),
+                'enabled': enabled,
                 'unit': str(trace.get('unit') or ''),
                 'label': str(trace.get('label') or 'value'),
                 'value': value,
                 'params': params,
             }
-            if include_series:
+            if include_series and enabled:
                 series = trace.get('series') or []
                 times = trace.get('times') or []
                 series2 = trace.get('series2') or []
-                # Keep full TRACE_WINDOW (do not clip to 200 — that was ~5s at 40Hz).
                 if isinstance(series, list):
-                    entry['series'] = [float(v) for v in series[-2500:]]
+                    series = series[-2500:]
                 else:
-                    entry['series'] = []
+                    series = []
                 if isinstance(times, list):
-                    entry['times'] = [float(v) for v in times[-2500:]]
+                    times = times[-2500:]
                 else:
-                    entry['times'] = []
+                    times = []
+                entry['series'] = [float(v) for v in series]
+                entry['times'] = (
+                    [float(t) for t in times] if len(times) == len(series) else []
+                )
                 if isinstance(series2, list) and series2:
                     entry['series2'] = [float(v) for v in series2[-2500:]]
                     entry['label2'] = str(trace.get('label2') or '')
@@ -283,7 +293,8 @@ def _volume_ducking(window) -> float:
 
 
 def _sensors_state(window) -> dict:
-    nodes = _sensor_nodes(window, include_series=True)
+    # Params/values only — series are on /v1/live for enabled nodes.
+    nodes = _sensor_nodes(window, include_series=False)
     any_enabled = any(n['enabled'] for n in nodes)
     ducking = _volume_ducking(window)
     hist = list(getattr(window, '_rest_sensor_history', []) or [])
@@ -319,7 +330,10 @@ def _foc_toolbar(window) -> dict:
 
 
 def build_live(window) -> dict:
-    """Lightweight snapshot for high-rate visualizer polling (skip cal/pulse/history/nodes)."""
+    """Lightweight snapshot for high-rate visualizer polling (skip cal/pulse/history).
+
+    Sensor series: enabled nodes only (full TRACE_WINDOW). Disabled = value+params.
+    """
     config = DeviceConfiguration.from_settings()
     mode = _phase_mode(config)
     ducking = _volume_ducking(window)
