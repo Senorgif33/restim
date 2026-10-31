@@ -136,3 +136,4 @@ dmypy.json
 experiments/
 trace/
 restim.ini
+.cursor/
