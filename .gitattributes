@@ -1,0 +1,32 @@
+# Default: normalize text to LF in the repo and working tree
+* text=auto eol=lf
+
+# Windows batch files need CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts must stay LF (Linux/macOS)
+*.sh text eol=lf
+
+# Common binaries — never convert
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.zip binary
+*.7z binary
+*.gz binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.exe binary
+*.dmg binary
