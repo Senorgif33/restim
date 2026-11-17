@@ -1,6 +1,6 @@
 @echo off
 setlocal
-set VENV_PATH=venv
+set VENV_PATH=venv-win
 
 if not exist "%VENV_PATH%" (
     echo setting up venv
