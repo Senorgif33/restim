@@ -21,9 +21,22 @@ Refer to the [wiki](https://github.com/diglet48/restim/wiki) for help.
 ### Windows
 download the latest release package: [Releases][releases]
 
-### Linux 
-make sure python 3.10 or newer is installed on your system.  
-Download the Restim source code, and execute `run.sh`
+### Linux
+Grab `Restim-x86_64.AppImage` from [Releases][releases], then:
+
+```sh
+chmod +x Restim-x86_64.AppImage
+./Restim-x86_64.AppImage
+```
+
+To run from source instead: install Python 3.10+, download the source, and execute `./run.sh`.
+
+To build the AppImage locally:
+
+```sh
+./build-linux-appimage.sh
+```
+
 
 ### Mac
 Grab the latest `.dmg` from [Releases][releases] —
@@ -61,7 +74,7 @@ Subsequent launches are normal double-clicks either way.
 > was removed in macOS Sequoia (15) for apps without a Developer ID
 > signature; use one of the options above instead.
 
-[releases]: https://github.com/diglet48/restim/releases
+[releases]: https://github.com/Senorgif33/restim/releases
 
 ### Development:
 install PyCharm and python 3.10 or newer.
