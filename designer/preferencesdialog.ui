@@ -867,6 +867,40 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_mpv">
+         <property name="title">
+          <string>mpv</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_mpv">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_mpv_ipc">
+            <property name="text">
+             <string>IPC socket / pipe</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="mpv_ipc_path">
+            <property name="toolTip">
+             <string>Same path as mpv --input-ipc-server (e.g. /tmp/mpv-socket)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="mpv_reload">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources/restim.qrc">
+              <normaloff>:/restim/arrow-round_poly.svg</normaloff>:/restim/arrow-round_poly.svg</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_6">
          <property name="orientation">
           <enum>Qt::Orientation::Vertical</enum>
@@ -1133,6 +1167,10 @@
   <tabstop>vlc_password</tabstop>
   <tabstop>kodi_address</tabstop>
   <tabstop>kodi_reload</tabstop>
+  <tabstop>ofs_address</tabstop>
+  <tabstop>ofs_reload</tabstop>
+  <tabstop>mpv_ipc_path</tabstop>
+  <tabstop>mpv_reload</tabstop>
   <tabstop>tableView</tabstop>
   <tabstop>button_funscript_reset_defaults</tabstop>
   <tabstop>button_patterns_enable_all</tabstop>

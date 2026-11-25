@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'preferencesdialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.3
+## Created by: Qt User Interface Compiler version 6.12.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -625,6 +625,29 @@ class Ui_PreferencesDialog(object):
 
         self.verticalLayout_6.addWidget(self.groupBox_12)
 
+        self.groupBox_mpv = QGroupBox(self.tab_media_settings)
+        self.groupBox_mpv.setObjectName(u"groupBox_mpv")
+        self.gridLayout_mpv = QGridLayout(self.groupBox_mpv)
+        self.gridLayout_mpv.setObjectName(u"gridLayout_mpv")
+        self.label_mpv_ipc = QLabel(self.groupBox_mpv)
+        self.label_mpv_ipc.setObjectName(u"label_mpv_ipc")
+
+        self.gridLayout_mpv.addWidget(self.label_mpv_ipc, 0, 0, 1, 1)
+
+        self.mpv_ipc_path = QLineEdit(self.groupBox_mpv)
+        self.mpv_ipc_path.setObjectName(u"mpv_ipc_path")
+
+        self.gridLayout_mpv.addWidget(self.mpv_ipc_path, 0, 1, 1, 1)
+
+        self.mpv_reload = QToolButton(self.groupBox_mpv)
+        self.mpv_reload.setObjectName(u"mpv_reload")
+        self.mpv_reload.setIcon(icon)
+
+        self.gridLayout_mpv.addWidget(self.mpv_reload, 0, 2, 1, 1)
+
+
+        self.verticalLayout_6.addWidget(self.groupBox_mpv)
+
         self.verticalSpacer_6 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_6.addItem(self.verticalSpacer_6)
@@ -803,7 +826,11 @@ class Ui_PreferencesDialog(object):
         QWidget.setTabOrder(self.vlc_username, self.vlc_password)
         QWidget.setTabOrder(self.vlc_password, self.kodi_address)
         QWidget.setTabOrder(self.kodi_address, self.kodi_reload)
-        QWidget.setTabOrder(self.kodi_reload, self.tableView)
+        QWidget.setTabOrder(self.kodi_reload, self.ofs_address)
+        QWidget.setTabOrder(self.ofs_address, self.ofs_reload)
+        QWidget.setTabOrder(self.ofs_reload, self.mpv_ipc_path)
+        QWidget.setTabOrder(self.mpv_ipc_path, self.mpv_reload)
+        QWidget.setTabOrder(self.mpv_reload, self.tableView)
         QWidget.setTabOrder(self.tableView, self.button_funscript_reset_defaults)
         QWidget.setTabOrder(self.button_funscript_reset_defaults, self.button_patterns_enable_all)
         QWidget.setTabOrder(self.button_patterns_enable_all, self.button_patterns_disable_all)
@@ -919,6 +946,12 @@ class Ui_PreferencesDialog(object):
         self.groupBox_12.setTitle(QCoreApplication.translate("PreferencesDialog", u"OFS", None))
         self.label_36.setText(QCoreApplication.translate("PreferencesDialog", u"address:port", None))
         self.ofs_reload.setText(QCoreApplication.translate("PreferencesDialog", u"...", None))
+        self.groupBox_mpv.setTitle(QCoreApplication.translate("PreferencesDialog", u"mpv", None))
+        self.label_mpv_ipc.setText(QCoreApplication.translate("PreferencesDialog", u"IPC socket / pipe", None))
+#if QT_CONFIG(tooltip)
+        self.mpv_ipc_path.setToolTip(QCoreApplication.translate("PreferencesDialog", u"Same path as mpv --input-ipc-server (e.g. /tmp/mpv-socket)", None))
+#endif // QT_CONFIG(tooltip)
+        self.mpv_reload.setText(QCoreApplication.translate("PreferencesDialog", u"...", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_media_settings), QCoreApplication.translate("PreferencesDialog", u"Media sync", None))
         self.groupBox_general.setTitle(QCoreApplication.translate("PreferencesDialog", u"General", None))
         self.prevent_system_sleep_when_active.setText(QCoreApplication.translate("PreferencesDialog", u"Prevent system sleep while active", None))
@@ -933,9 +966,9 @@ class Ui_PreferencesDialog(object):
         self.button_patterns_enable_all.setText(QCoreApplication.translate("PreferencesDialog", u"Enable All", None))
         self.button_patterns_disable_all.setText(QCoreApplication.translate("PreferencesDialog", u"Disable All", None))
         ___qtablewidgetitem = self.patterns_table.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(QCoreApplication.translate("PreferencesDialog", u"Pattern", None));
+        ___qtablewidgetitem.setText(QCoreApplication.translate("PreferencesDialog", u"Pattern", None))
         ___qtablewidgetitem1 = self.patterns_table.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("PreferencesDialog", u"Enabled", None));
+        ___qtablewidgetitem1.setText(QCoreApplication.translate("PreferencesDialog", u"Enabled", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_patterns), QCoreApplication.translate("PreferencesDialog", u"Patterns", None))
     # retranslateUi
 

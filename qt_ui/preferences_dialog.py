@@ -84,6 +84,9 @@ class PreferencesDialog(QDialog, Ui_PreferencesDialog):
         self.ofs_reload.clicked.connect(
             functools.partial(self.ofs_address.setText, qt_ui.settings.media_sync_ofs_address.default_value)
         )
+        self.mpv_reload.clicked.connect(
+            functools.partial(self.mpv_ipc_path.setText, qt_ui.settings.media_sync_mpv_ipc_path.default_value)
+        )
 
         # focstim/neostim reload serial devices
         self.focstim_refresh_serial_devices.clicked.connect(self.repopulate_serial_devices)
@@ -186,6 +189,7 @@ class PreferencesDialog(QDialog, Ui_PreferencesDialog):
         self.vlc_password.setText(qt_ui.settings.media_sync_vlc_password.get())
         self.kodi_address.setText(qt_ui.settings.media_sync_kodi_address.get())
         self.ofs_address.setText(qt_ui.settings.media_sync_ofs_address.get())
+        self.mpv_ipc_path.setText(qt_ui.settings.media_sync_mpv_ipc_path.get())
 
         # display settings
         self.prevent_system_sleep_when_active.setChecked(qt_ui.settings.prevent_system_sleep_when_active.get())
@@ -355,6 +359,7 @@ class PreferencesDialog(QDialog, Ui_PreferencesDialog):
         qt_ui.settings.media_sync_vlc_password.set(self.vlc_password.text())
         qt_ui.settings.media_sync_kodi_address.set(self.kodi_address.text())
         qt_ui.settings.media_sync_ofs_address.set(self.ofs_address.text())
+        qt_ui.settings.media_sync_mpv_ipc_path.set(self.mpv_ipc_path.text())
 
         # display
         qt_ui.settings.prevent_system_sleep_when_active.set(self.prevent_system_sleep_when_active.isChecked())

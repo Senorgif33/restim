@@ -1,5 +1,6 @@
 from PySide6.QtCore import QSettings
 import os
+import sys
 
 
 def get_settings_instance():
@@ -119,6 +120,11 @@ media_sync_vlc_username = Setting('media_sync/vlc_username', '', str)
 media_sync_vlc_password = Setting('media_sync/vlc_password', '1234', str)
 media_sync_kodi_address = Setting('media_sync/kodi_address', 'ws://127.0.0.1:9090', str)
 media_sync_ofs_address = Setting('media_sync/ofs_address', 'ws://127.0.0.1:8081/ofs', str)
+media_sync_mpv_ipc_path = Setting(
+    'media_sync/mpv_ipc_path',
+    r'\\.\pipe\mpv-pipe' if sys.platform == 'win32' else '/tmp/mpv-socket',
+    str,
+)
 media_sync_stop_audio_automatically = Setting('media_sync/stop_audio_automatically', True, bool)
 media_sync_time_offset_ms = Setting('media_sync/time_offset_ms', 0, int)
 

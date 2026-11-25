@@ -21,6 +21,7 @@ from qt_ui.media_settings_widget_ui import Ui_MediaSettingsWidget
 
 from net.media_source.internal import Internal
 from net.media_source.mpc import MPC
+from net.media_source.mpv import MPV
 from net.media_source.ofs import OFS
 from qt_ui.models.script_mapping import FunscriptTreeItem, ScriptMappingModel
 from qt_ui.widgets.table_view_with_combobox import ComboBoxDelegate, ButtonDelegate
@@ -45,13 +46,10 @@ class MediaSettingsWidget(QtWidgets.QWidget, Ui_MediaSettingsWidget, metaclass=_
             VLC(self),
             Kodi(self),
             OFS(self),
+            MPV(self),
         ]
-        self.media_sync[0].connectionStatusChanged.connect(functools.partial(self.connection_status_changed, 0))
-        self.media_sync[1].connectionStatusChanged.connect(functools.partial(self.connection_status_changed, 1))
-        self.media_sync[2].connectionStatusChanged.connect(functools.partial(self.connection_status_changed, 2))
-        self.media_sync[3].connectionStatusChanged.connect(functools.partial(self.connection_status_changed, 3))
-        self.media_sync[4].connectionStatusChanged.connect(functools.partial(self.connection_status_changed, 4))
-        self.media_sync[5].connectionStatusChanged.connect(functools.partial(self.connection_status_changed, 5))
+        for index, source in enumerate(self.media_sync):
+            source.connectionStatusChanged.connect(functools.partial(self.connection_status_changed, index))
 
         self.comboBox.addItem("Internal")
         self.comboBox.addItem(QIcon(":/restim/media_players/mpc-hc.png"), "MPC-HC")
@@ -59,6 +57,7 @@ class MediaSettingsWidget(QtWidgets.QWidget, Ui_MediaSettingsWidget, metaclass=_
         self.comboBox.addItem(QIcon(":/restim/media_players/vlc.svg"), "VLC")
         self.comboBox.addItem(QIcon(":/restim/media_players/kodi.png"), "Kodi")
         self.comboBox.addItem(QIcon(":/restim/media_players/ofs.png"), "OFS")
+        self.comboBox.addItem(QIcon(":/restim/media_players/mpv.svg"), "mpv")
         self.comboBox.currentIndexChanged.connect(self.media_index_changed)
 
         self.loaded_media_path = None
