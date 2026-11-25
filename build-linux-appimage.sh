@@ -113,6 +113,10 @@ rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/bin"
 cp -a dist/restim/. "$APPDIR/usr/bin/"
 
+# Safety net: never ship host-conflicting C++ runtime libs in the AppImage.
+# restim-linux.spec already excludes these; remove any stragglers from deps.
+find "$APPDIR" \( -name 'libstdc++.so*' -o -name 'libgcc_s.so*' \) -print -delete || true
+
 cp resources/favicon.png "$APPDIR/restim.png"
 
 cat > "$APPDIR/restim.desktop" <<EOF

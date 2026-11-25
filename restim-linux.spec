@@ -3,6 +3,20 @@ from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
+# Do not ship these in the AppImage. Bundled copies are often older than the
+# host libstdc++ that system audio libs (e.g. JACK via PortAudio) need, which
+# breaks launch with missing GLIBCXX_* symbols. Use the host C++ runtime instead.
+_EXCLUDED_SHARED_LIBS = {
+    'libstdc++.so.6',
+    'libgcc_s.so.1',
+}
+
+
+def _keep_binary(entry):
+    name = entry[0].split('/')[-1]
+    return name not in _EXCLUDED_SHARED_LIBS
+
+
 added_files = [
     ('resources/favicon.png', 'resources/'),
 ]
@@ -23,6 +37,7 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
+a.binaries = [entry for entry in a.binaries if _keep_binary(entry)]
 
 pyz = PYZ(
     a.pure,
